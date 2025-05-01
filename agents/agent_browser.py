@@ -1,36 +1,40 @@
+import asyncio
+import os
+
 from browser_use.agent.service import Agent
+from browser_use.browser.browser import BrowserConfig, Browser
+from browser_use.browser.context import BrowserContextConfig, BrowserContext
+from langchain_anthropic import ChatAnthropic
 
-class ScrapingAgentFactory:
-    """
-    A factory class for creating various types of web scraping agents.
-    """
+async def browseit(task: str ="") -> None:
+    system_prompt = """
+            Você é um assistente de web scraper, sua tarefa é coletar dados
+            {0}
+           """
+    browser_ctx_config = BrowserContextConfig(
+        save_har_path="browser_requests.json",
+    )
 
-    @staticmethod
-    def create_agent(
-        llm,
-        browser_context,
-        system_prompt="""
-         Você é um assistente de web scraper, sua tarefa é coletar dados
-         {0}
-        """,
-        instruction="",
-    ):
-        """
-        Creates an Agent configured to scrape Analyzer and Plan.
+    browser_config = BrowserConfig(
+        headless=True,
+    )
 
-        Args:
-            llm: The language model instance for the agent.
-            browser_context: The browser context for the agent.
-            system_prompt: The system prompt for the agent.
+    browser = Browser(config=browser_config)
 
-        Returns:
-            An configured Agent instance.
-        """
+    browser_ctx = BrowserContext(browser=browser, config=browser_ctx_config)
 
+    llm = ChatAnthropic(
+        model_name=os.getenv('ANTROPIC_MODEL'),
+        api_key=os.getenv('ANTROPIC_API_KEY'),
+        temperature=0.0,
+        timeout=100  # Increase for complex tasks
+    )
+    agent = Agent(
+        task=system_prompt.format(task),  # Use strip() for cleaner task string
+        llm=llm,
+        browser_context=browser_ctx,
+    )
+    await agent.run()
+    await browser_ctx.close()
+    await browser.close()
 
-        agent = Agent(
-            task=system_prompt.format(instruction), # Use strip() for cleaner task string
-            llm=llm,
-            browser_context=browser_context,
-        )
-        return agent
