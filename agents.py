@@ -90,6 +90,7 @@ class BrowserAgent(RoutedAgent):
             cancellation_token=ctx.cancellation_token,
         )
 
+
         response = llm_result.content
         assert isinstance(response, str)
         await self.publish_message(Message(file_content), topic_id=TopicId(scraping_planner_topic_type, source=self.id.key))
