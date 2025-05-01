@@ -175,7 +175,6 @@ class CodeImplementerAgent(RoutedAgent):
     @message_handler
     async def handle_code_implementer(self, message: Message, ctx: MessageContext) -> None:
         prompt = f"Cria um web scraper seguindo o plano: {message.content}"
-        pdb.set_trace()
         llm_result = await self._model_client.create(
             messages=[self._system_message, UserMessage(content=prompt, source=self.id.key)],
             cancellation_token=ctx.cancellation_token
