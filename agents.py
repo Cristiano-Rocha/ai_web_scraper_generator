@@ -188,7 +188,7 @@ class CodeImplementerAgent(RoutedAgent):
 _model_client =  AzureAIChatCompletionClient(
         model="gpt-4o-mini",
         endpoint=os.getenv('AZURE_ENDPOINT_URL'),
-        credential=AzureKeyCredential(os.getenv('AZURE_ENPOINT_API_KEY')),
+        credential=AzureKeyCredential(os.getenv('AZURE_ENDPOINT_API_KEY')),
         model_info={
             "json_output": False,
             "function_calling": True,
@@ -199,7 +199,7 @@ _model_client =  AzureAIChatCompletionClient(
     )
 runtime = SingleThreadedAgentRuntime()
 
-async def main():
+async def main(instructions: str = "vá para o site https://example.com e capture a informação principal"):
     await BrowserAgent.register(
         runtime,
         type=browser_agent_topic_type,
@@ -221,7 +221,7 @@ async def main():
     runtime.start()
 
     await runtime.publish_message(
-        Message(content="vá para o site https://example.com e capture a informação principal."),
+        Message(content=instructions),
         topic_id=TopicId(browser_agent_topic_type, source="default"),
     )
 
